@@ -6,6 +6,7 @@ const App = () => {
   const [movieName, setMovieName] = useState("");
   const [review, setReview] = useState("");
   const [movieReviewList, setMovieList] = useState([]);
+  const [newReview, setNewReview] = useState("");
 
   useEffect(() => {
     Axios.get("http://localhost:3001/api/get").then((response) => {
@@ -18,9 +19,21 @@ const App = () => {
     Axios.post("http://localhost:3001/api/insert", {
       movieName: movieName,
       movieReview: review,
-    }).then(() => {
-      alert("Successful insert");
     });
+    setMovieList([
+      ...movieReviewList,
+      { movieName: movieName, movieReview: review },
+    ]);
+  };
+  const deleteReview = (movie) => {
+    Axios.delete(`http://localhost:3001/api/delete/${movie}`);
+  };
+  const updateReview = (movie) => {
+    Axios.put("http://localhost:3001/api/update/", {
+      movieName: movie,
+      movieReview: newReview,
+    });
+    setNewReview("");
   };
   return (
     <div className="App">
@@ -43,13 +56,43 @@ const App = () => {
           }}
         />
         <button onClick={submitReview}>Submit</button>
-        {movieReviewList.map((val) => {
-          return (
-            <h1>
-              Movie Name : {val.movieName} | Movie Review : {val.movieReview}
-            </h1>
-          );
-        })}
+        <table className="table">
+          <tr>
+            <th>Movie Name</th>
+            <th>Movie Review</th>
+            <th>Movie Update & Delete</th>
+          </tr>
+          {movieReviewList.map((val) => {
+            return (
+              <tr className="card">
+                <td>{val.movieName}</td>
+                <td>{val.movieReview}</td>
+                <td>
+                  <button
+                    onClick={() => {
+                      updateReview(val.movieName);
+                    }}
+                  >
+                    Update
+                  </button>
+                  <input
+                    type="text"
+                    onChange={(e) => {
+                      setNewReview(e.target.value);
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      deleteReview(val.movieName);
+                    }}
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
+        </table>
       </div>
     </div>
   );
